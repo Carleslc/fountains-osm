@@ -8,6 +8,8 @@ import overpass
 from app.services.nominatim_api import NominatimAPI
 from app.errors import RequestTimeoutError, OpenStreetMapError
 
+from app.config import logger
+
 API_URL = "https://overpass-api.de/"
 API_ENDPOINT = f'{API_URL}/api/interpreter'
 
@@ -54,28 +56,28 @@ class OpenStreetMapAPI:
         self._fountains_query_template = _load_query_template(FOUNTAIN_QUERY_TEMPLATE_FILE)
 
     def get_fountains(self, timeout: int = 1200) -> dict:
-        print('fountains', f'{timeout=}')
+        logger.info('fountains timeout=%s', timeout)
 
         return self.__get_fountains_with_query(timeout)
 
     def get_fountains_by_area(self, area: str, timeout: int = 60) -> dict:
         area_id = self.geocoding_api.find_area_id(area)
 
-        print('fountains_by_area', area, area_id)
+        logger.info('fountains_by_area %s %s', area, area_id)
 
         return self.__get_fountains_with_query(timeout,
                                                bbox='area.searchArea',
                                                area_id=f'area(id:{area_id})->.searchArea;')
 
     def get_fountains_by_radius(self, lat: float, long: float, radius: int, timeout: int = 20) -> dict:
-        print('fountains_by_radius', f'{radius}m around {lat},{long}')
+        logger.info('fountains_by_radius %(radius)s around %(lat)s,%(long)s', { 'radius': radius, 'lat': lat, 'long': long })
 
         return self.__get_fountains_with_query(timeout, bbox=f'around:{radius},{lat},{long}')
 
     def get_fountains_by_bbox(self, south_lat: float, west_long: float, north_lat: float, east_long: float, timeout: int = 30) -> dict:
         bbox = f'{south_lat},{west_long},{north_lat},{east_long}'
 
-        print('fountains_by_bbox', f'bbox {bbox}')
+        logger.info('fountains_by_bbox bbox %s', bbox)
 
         return self.__get_fountains_with_query(timeout, bbox)
 
@@ -86,7 +88,7 @@ class OpenStreetMapAPI:
             bbox=f'({bbox})' if bbox else ''
         )
 
-        print(fountains_query)
+        logger.debug(fountains_query)
 
         try:
             result = self.overpass_api.get(fountains_query, responseformat='json', build=False)

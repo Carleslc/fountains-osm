@@ -2,6 +2,4 @@ requests
 fastapi
 overpass
 geopy
-
-# CLI
-colorama
+python-dotenv

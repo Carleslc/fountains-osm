@@ -6,7 +6,13 @@ Service to retrieve drinking water fountains from OpenStreetMap.
 
 ### Development
 
-Install: `pip install --user --upgrade -r requirements.txt`
+#### Install
+
+Install dependencies:
+`pip install --user --upgrade -r requirements.txt`
+
+Configure environment:
+`cp .env.template .env`
 
 Run: `fastapi dev app/main.py`
 
