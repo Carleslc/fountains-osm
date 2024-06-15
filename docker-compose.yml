@@ -1,0 +1,9 @@
+services:
+  fountains-osm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fountains-osm
+    ports:
+      - "8000:80"
+    restart: unless-stopped

@@ -22,6 +22,16 @@ Run: `fastapi dev app/main.py`
 
 Run: `fastapi run app/main.py --workers 2`
 
+Using Docker:
+
+```bash
+docker compose up --build -d
+
+docker logs -f fountains-osm
+
+docker compose down
+```
+
 https://fastapi.tiangolo.com/deployment/docker
 
 ### Queries

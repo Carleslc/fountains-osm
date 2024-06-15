@@ -2,9 +2,11 @@ FROM python:3.12
 
 WORKDIR /fountains-osm
 
-COPY ./requirements.txt /fountains-osm/requirements.txt
+COPY requirements.txt .
 
-RUN pip install --no-cache-dir --upgrade -r /fountains-osm/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+COPY .env.template .env
 
 COPY ./app /fountains-osm/app
 COPY ./queries /fountains-osm/queries
