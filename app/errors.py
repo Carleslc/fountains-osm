@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 
 from app.models.response import QueryResponse
 
+from app.config import logger
 
 class ErrorResponse(QueryResponse):
     error: str
@@ -24,6 +25,8 @@ class OpenStreetMapError(RequestError):
 
 
 async def request_error_handler(request: Request, error: RequestError) -> Response:
+    logger.error(error.detail)
+
     return JSONResponse(
         status_code=error.status_code,
         content=ErrorResponse(query_url=str(request.url), error=error.detail).model_dump(mode='json')
