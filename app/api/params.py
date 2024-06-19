@@ -3,6 +3,8 @@ from typing_extensions import Annotated
 
 from dataclasses import dataclass
 
+from datetime import datetime
+
 from fastapi import Query
 
 Timeout = Annotated[int, Query(description="Timeout in seconds for the OSM API request (maximum 30 minutes)", le=1800)]
@@ -26,6 +28,7 @@ class BboxQueryParamsBase:
 
 @dataclass
 class CommonQueryParams:
+    updated: Annotated[datetime | None, Query(description="Search only data updated since a specified datetime, in ISO 8601 format")] = None
     raw: Annotated[bool, Query(description="Set to true to get the raw OSM data")] = False
     osm: Annotated[bool, Query(description="Include OSM extra information (type, id, version, url, tags). Ignored if raw is true")] = False
     timeout: Timeout = 60

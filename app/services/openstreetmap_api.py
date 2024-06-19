@@ -2,6 +2,8 @@
 Request fountains in OpenStreetMap using Overpass API
 """
 
+from datetime import datetime, timezone
+
 import re
 import overpass
 
@@ -55,37 +57,70 @@ class OpenStreetMapAPI:
     def __load_query_templates(self):
         self._fountains_query_template = _load_query_template(FOUNTAIN_QUERY_TEMPLATE_FILE)
 
-    def get_fountains(self, timeout: int = 1200) -> dict:
+    def get_fountains(self, updated: datetime | None = None, timeout: int = 1200) -> dict:
         logger.info('fountains timeout=%s', timeout)
 
-        return self.__get_fountains_with_query(timeout)
+        return self.__get_fountains_with_query(timeout, updated=updated)
 
-    def get_fountains_by_area(self, area: str, timeout: int = 60) -> dict:
+    def get_fountains_by_area(self,
+                              area: str,
+                              updated: datetime | None = None,
+                              timeout: int = 60) -> dict:
         area_id = self.geocoding_api.find_area_id(area)
 
         logger.info('fountains_by_area %s %s', area, area_id)
 
         return self.__get_fountains_with_query(timeout,
-                                               bbox='area.searchArea',
-                                               area_id=f'area(id:{area_id})->.searchArea;')
+                                               search='area.searchArea',
+                                               area_id=area_id,
+                                               updated=updated)
 
-    def get_fountains_by_radius(self, lat: float, long: float, radius: int, timeout: int = 20) -> dict:
+    def get_fountains_by_radius(self,
+                                lat: float, long: float,
+                                radius: int,
+                                updated: datetime | None = None,
+                                timeout: int = 20) -> dict:
         logger.info('fountains_by_radius %(radius)s around %(lat)s,%(long)s', { 'radius': radius, 'lat': lat, 'long': long })
 
-        return self.__get_fountains_with_query(timeout, bbox=f'around:{radius},{lat},{long}')
+        return self.__get_fountains_with_query(timeout,
+                                               search=f'around:{radius},{lat},{long}',
+                                               updated=updated)
 
-    def get_fountains_by_bbox(self, south_lat: float, west_long: float, north_lat: float, east_long: float, timeout: int = 30) -> dict:
+    def get_fountains_by_bbox(self,
+                              south_lat: float, west_long: float, north_lat: float, east_long: float,
+                              updated: datetime | None = None,
+                              timeout: int = 30) -> dict:
         bbox = f'{south_lat},{west_long},{north_lat},{east_long}'
 
-        logger.info('fountains_by_bbox bbox %s', bbox)
+        logger.info('fountains_by_bbox %s', bbox)
 
-        return self.__get_fountains_with_query(timeout, bbox)
+        return self.__get_fountains_with_query(timeout, bbox, updated=updated)
 
-    def __get_fountains_with_query(self, timeout: int, bbox: str = '', area_id: str = '') -> dict: # json
+    def __get_fountains_with_query(self,
+                                   timeout: int,
+                                   bbox: str = '',
+                                   search: str = '',
+                                   area_id: int | None = None,
+                                   updated: datetime | None = None) -> dict: # json
+        if bbox:
+            bbox = f'[bbox:{bbox}]'
+
+        if search:
+            search = f'({search})'
+
+        if updated:
+            if bbox or search or (datetime.now(timezone.utc) - updated).days >= 7:
+                updated_filter = 'newer'
+            else:
+                updated_filter = 'changed'
+
+            search += f'({updated_filter}:"{updated.isoformat()}")'
+
         fountains_query = self._fountains_query_template.format(
             timeout=str(timeout),
-            area_id=area_id,
-            bbox=f'({bbox})' if bbox else ''
+            bbox=bbox,
+            search=search,
+            area_id=f'area(id:{area_id})->.searchArea;' if area_id else '',
         )
 
         logger.debug(fountains_query)

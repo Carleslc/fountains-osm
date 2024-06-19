@@ -53,6 +53,10 @@ INFO = {
             "Find all fountains in the world": [
                 "/fountains?timeout=1800",
                 "/fountains?timeout=1200&raw=true",
+            ],
+            "Find updated fountains since a specified date and time": [
+                "/fountains/bbox?updated=2024-01-01T00:00:00%2B00:00&south_lat=41.36792&west_long=2.098646&north_lat=41.42857&east_long=2.209196",
+                "/fountains?updated=2024-06-15T00:00:00Z&timeout=1800",
             ]
         }
     }
