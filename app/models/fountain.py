@@ -1,7 +1,9 @@
 from typing import Any, Dict, Optional
+
 from enum import Enum
 from datetime import datetime
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel
 
 class FountainType(str, Enum):
     NATURAL = "natural"
@@ -16,6 +18,7 @@ class SafeWater(str, Enum):
 class LegalWater(str, Enum):
     TREATED = "treated"
     UNTREATED = "untreated"
+
 
 class Fountain(BaseModel):
     type: Optional[FountainType] = None
@@ -32,16 +35,11 @@ class Fountain(BaseModel):
     access_wheelchair: Optional[bool] = None
     provider_name: str
     provider_id: str
-    updated_at: datetime
+    updated_at: datetime # provider_updated_at
 
-    class Config:
-        use_enum_values = True
-        json_encoders = {
-            datetime: lambda dt: dt.isoformat(),
-        }
 
 class FountainOpenStreetMap(Fountain):
-    provider_name: str = Field(default="OpenStreetMap", exclude=True)
+    provider_name: str = "OpenStreetMap"
     osm: Optional['FountainOpenStreetMapInfo'] = None
 
 class FountainOpenStreetMapInfo(BaseModel):

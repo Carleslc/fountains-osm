@@ -20,8 +20,8 @@ class RequestTimeoutError(RequestError):
 
 class OpenStreetMapError(RequestError):
 
-    def __init__(self, error: str = "OpenStreetMap error"):
-        super().__init__(HTTPStatus.HTTP_502_BAD_GATEWAY, error)
+    def __init__(self, error: str = "OpenStreetMap error", status: int = HTTPStatus.HTTP_502_BAD_GATEWAY):
+        super().__init__(status, error)
 
 
 async def request_error_handler(request: Request, error: RequestError) -> Response:

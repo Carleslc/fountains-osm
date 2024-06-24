@@ -3,3 +3,5 @@ fastapi
 overpass
 geopy
 python-dotenv
+typer
+rich

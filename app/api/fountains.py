@@ -18,9 +18,7 @@ router = APIRouter(
 
 osm_api = OpenStreetMapAPI()
 
-@router.get("/",
-            response_model=FountainsOpenStreetMapResponse | Dict[str, Any],
-            response_model_exclude_none=True)
+@router.get("/", response_model=FountainsOpenStreetMapResponse | Dict[str, Any])
 def get_fountains_by_area(
     request: Request,
     params: AreaQueryParams = Depends(),
@@ -47,9 +45,7 @@ def get_fountains_by_area(
 
     return build_fountains_response(request, osm_data, params.raw, params.osm)
 
-@router.get("/radius",
-            response_model=FountainsOpenStreetMapResponse | Dict[str, Any],
-            response_model_exclude_none=True)
+@router.get("/radius", response_model=FountainsOpenStreetMapResponse | Dict[str, Any])
 def get_fountains_by_radius(
     request: Request,
     params: RadiusQueryParams = Depends(),
@@ -74,9 +70,7 @@ def get_fountains_by_radius(
 
     return build_fountains_response(request, osm_data, params.raw, params.osm)
 
-@router.get("/bbox",
-            response_model=FountainsOpenStreetMapResponse | Dict[str, Any],
-            response_model_exclude_none=True)
+@router.get("/bbox", response_model=FountainsOpenStreetMapResponse | Dict[str, Any])
 def get_fountains_by_bbox(
     request: Request,
     params: BboxQueryParams = Depends(),
@@ -103,14 +97,26 @@ def get_fountains_by_bbox(
     return build_fountains_response(request, osm_data, params.raw, params.osm)
 
 
-def build_fountains_response(request: Request, osm_data: Dict[str, Any], raw: bool, osm: bool) -> FountainsOpenStreetMapResponse | JSONResponse:
+def build_fountains_response(request: Request, osm_data: Dict[str, Any], raw: bool, osm: bool) -> JSONResponse:
     if raw:
         return JSONResponse(content=osm_data)
 
     fountains = transform_fountains_osm(osm_data, osm)
 
-    return FountainsOpenStreetMapResponse(
+    response = FountainsOpenStreetMapResponse(
         query_url=str(request.url),
         count=len(fountains),
         fountains=fountains
+    )
+
+    return JSONResponse(
+        content=response.model_dump(
+            mode='json',
+            exclude_none=True,
+            exclude={
+                'fountains': {
+                    '__all__': { 'provider_name' }
+                }
+            }
+        )
     )

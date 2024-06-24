@@ -28,7 +28,7 @@ class BboxQueryParamsBase:
 
 @dataclass
 class CommonQueryParams:
-    updated: Annotated[datetime | None, Query(description="Search only fountains updated since a specified datetime, in ISO 8601 format")] = None
+    updated: Annotated[datetime | None, Query(description="Search only fountains updated since a specified datetime, in ISO 8601 format", alias="since")] = None
     raw: Annotated[bool, Query(description="Set to true to get the raw OSM data")] = False
     osm: Annotated[bool, Query(description="Include OSM extra information (type, id, version, url, tags). Ignored if raw is true")] = False
     timeout: Timeout = 60

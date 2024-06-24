@@ -2,6 +2,8 @@
 Geocoding to request OpenStreetMap areas using Nominatim API
 """
 
+from fastapi import status as HTTPStatus
+
 from geopy.location import Location
 from geopy.geocoders import Nominatim
 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
@@ -29,7 +31,7 @@ class NominatimAPI:
             raise OpenStreetMapError(f"Geocoding request error: {repr(e)}") from e
 
         if geocoding_result is None:
-            return None
+            raise OpenStreetMapError(f"Geocoding request error: {geocode_area} not found", status=HTTPStatus.HTTP_404_NOT_FOUND)
 
         area_id = int(geocoding_result.raw["osm_id"]) + 3600000000 # relation id to area id
 

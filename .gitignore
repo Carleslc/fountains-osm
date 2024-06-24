@@ -1,2 +1,12 @@
+# Python
 __pycache__/
+
+# Environment
 .env
+
+# CLI files
+.fountains_cli.log
+fountains-*.json
+
+# Other
+.DS_Store
