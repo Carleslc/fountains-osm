@@ -153,7 +153,7 @@ def show_log():
 def fetch_fountains(
     context: typer.Context,
     area: Optional[str] = typer.Option(None, help="Search in a geographical region (geocode area: country, city, state...). If not specified, all world data is retrieved."),
-    since: Optional[datetime] = typer.Option(None, "--since", "--updated", help="Search only fountains updated since a specified datetime, in ISO 8601 format.", formats=["%d/%m/%Y", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S%z"]),
+    since: Optional[datetime] = typer.Option(None, "--since", "--updated", help="Search only fountains updated since a specified datetime, in ISO 8601 format.", formats=["%d/%m/%Y", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f%z"]),
     update: bool = typer.Option(False, "--update", help="Set --since automatically from the latest log of --area"),
     osm: bool = typer.Option(False, "--osm", help="Include OSM extra information (type, id, version, url, tags)"),
     timeout: int = typer.Option(1800, help="Timeout in seconds for the OSM API request (maximum 30 minutes)"),
