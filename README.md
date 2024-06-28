@@ -75,25 +75,31 @@ Within a bounding box: `/fountains/bbox?updated=2024-01-01T00:00:00+00:00&south_
 `python fountains_cli.py --help`
 
 ```
-Usage: fountains_cli.py [OPTIONS] COMMAND [ARGS]...                                                                                                                                                                                   
-                                                                                                                                                                                                                                       
- Fetch fountains data from OpenStreetMap and save to file or post to a url.                                                                                                                                                            
-                                                                                                                                                                                                                                       
-╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --area                        TEXT                                                       Search in a geographical region (geocode area: country, city, state...). If not specified, all world data is retrieved. [default: None]    │
-│ --since,--updated             [%d/%m/%Y|%Y-%m-%d|%Y-%m-%dT%H:%M:%S|%Y-%m-%dT%H:%M:%S%z]  Search only fountains updated since a specified datetime, in ISO 8601 format. [default: None]                                              │
-│ --update                                                                                 Set --since automatically from the latest log of --area                                                                                    │
-│ --osm                                                                                    Include OSM extra information (type, id, version, url, tags)                                                                               │
-│ --timeout                     INTEGER                                                    Timeout in seconds for the OSM API request (maximum 30 minutes) [default: 1800]                                                            │
-│ --post                        TEXT                                                       URL to POST the fountains data [default: None]                                                                                             │
-│ --put                         TEXT                                                       URL to PUT the fountains data [default: None]                                                                                              │
-│ --install-completion                                                                     Install completion for the current shell.                                                                                                  │
-│ --show-completion                                                                        Show completion for the current shell, to copy it or customize the installation.                                                           │
-│ --help                -h                                                                 Show this message and exit.                                                                                                                │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Commands ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ log   Show the log of previous requests. Alias: --logs                                                                                                                                                                              │
-╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Usage: fountains_cli.py [OPTIONS] COMMAND [ARGS]...                                                                                                            
+                                                                                                                                                                
+ Fetch fountains data from OpenStreetMap and save to file or post to a url.                                                                                     
+                                                                                                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --area                        TEXT                                                           Search in a geographical region (geocode area: country, city,   │
+│                                                                                              state...). If not specified, all world data is retrieved.       │
+│                                                                                              [default: None]                                                 │
+│ --since,--updated             [%d/%m/%Y|%Y-%m-%d|%Y-%m-%dT%H:%M:%S|%Y-%m-%dT%H:%M:%S.%f|%Y-  Search only fountains updated since a specified datetime, in    │
+│                               %m-%dT%H:%M:%S%z|%Y-%m-%dT%H:%M:%S.%f%z]                       ISO 8601 format.                                                │
+│                                                                                              [default: None]                                                 │
+│ --update                                                                                     Set --since automatically from the latest log of --area         │
+│ --osm                                                                                        Include OSM extra information (type, id, version, url, tags)    │
+│ --timeout                     INTEGER                                                        Timeout in seconds for the OSM API request (maximum 30 minutes) │
+│                                                                                              [default: 1800]                                                 │
+│ --post                        TEXT                                                           URL to POST the fountains data [default: None]                  │
+│ --put                         TEXT                                                           URL to PUT the fountains data [default: None]                   │
+│ --install-completion                                                                         Install completion for the current shell.                       │
+│ --show-completion                                                                            Show completion for the current shell, to copy it or customize  │
+│                                                                                              the installation.                                               │
+│ --help                -h                                                                     Show this message and exit.                                     │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ log   Show the log of previous requests. Alias: --logs                                                                                                       │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 #### Save fountains data to a file
