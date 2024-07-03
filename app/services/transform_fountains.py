@@ -124,7 +124,7 @@ def transform_fountains_osm(osm_data: Dict[str, Any], include_osm: bool = False)
                 access_pets=determine_access_pets(tags),
                 access_wheelchair=determine_access_wheelchair(tags),
                 provider_id=f'{element_type}:{element_id}',
-                updated_at=datetime.fromisoformat(element["timestamp"]), # before python 3.11: replace('Z', '+00:00')
+                provider_updated_at=datetime.fromisoformat(element["timestamp"]), # before python 3.11: replace('Z', '+00:00')
             )
 
             if include_osm:

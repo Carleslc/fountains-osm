@@ -35,7 +35,7 @@ class Fountain(BaseModel):
     access_wheelchair: Optional[bool] = None
     provider_name: str
     provider_id: str
-    updated_at: datetime # provider_updated_at
+    provider_updated_at: datetime
 
 
 class FountainOpenStreetMap(Fountain):

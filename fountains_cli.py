@@ -37,13 +37,23 @@ def save_fountains_to_file(fountains: List[FountainOpenStreetMap], filename: str
     console.print(filename, style="file", highlight=False, end=' ')
     console.print(f"({format_size(file_size(filename))})", style="dim")
 
-def post_fountains_to_url(request_method: Callable[..., requests.Response], fountains: List[FountainOpenStreetMap], endpoint_url: str, timeout: int):
+def post_fountains_to_url(request_type: str, request_method: Callable[..., requests.Response], fountains: List[FountainOpenStreetMap], endpoint_url: str, timeout: int):
+    console.print(request_type, end=' ')
+    console.print(endpoint_url, style="file", highlight=False)
+
     headers = { 'Content-Type': 'application/json' }
     response = request_method(endpoint_url, json=fountains_body(fountains), headers=headers, timeout=timeout)
+
+    console.print(f"{request_type} ({response.status_code})")
+    response_body = response.json() if response.content else None
+    print_response(response_body)
+    
     response.raise_for_status()
-    console.print("Sent to: ", end='')
-    console.print(endpoint_url, style="file", highlight=False)
-    return response.json()
+    return response_body
+
+def print_response(response: Optional[str] = None):
+    if response:
+        console.print(response, style='debug')
 
 def load_logs() -> List[Dict[str, Any]]:
     if os.path.exists(LOG_FILE):
@@ -142,7 +152,7 @@ def show_log():
                 str(log.get("count")),
                 str(log.get("timeout")),
                 str(log.get("osm")),
-                log.get("post", log.get("put", '')),
+                log.get("post") or log.get("put"),
                 f"{log.get("request_time"):.3f}",
                 f"{log.get("post_time"):.3f}",
             )
@@ -156,7 +166,7 @@ def fetch_fountains(
     since: Optional[datetime] = typer.Option(None, "--since", "--updated", help="Search only fountains updated since a specified datetime, in ISO 8601 format.", formats=["%d/%m/%Y", "%Y-%m-%d", "%Y-%m-%dT%H:%M:%S", "%Y-%m-%dT%H:%M:%S.%f", "%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%S.%f%z"]),
     update: bool = typer.Option(False, "--update", help="Set --since automatically from the latest log of --area"),
     osm: bool = typer.Option(False, "--osm", help="Include OSM extra information (type, id, version, url, tags)"),
-    timeout: int = typer.Option(1800, help="Timeout in seconds for the OSM API request (maximum 30 minutes)"),
+    timeout: int = typer.Option(1800, help="Timeout in seconds for the OSM API request (default 30 minutes)"),
     post: Optional[str] = typer.Option(None, help="URL to POST the fountains data"),
     put: Optional[str] = typer.Option(None, help="URL to PUT the fountains data")
 ):
@@ -176,7 +186,7 @@ def fetch_fountains(
         timestamp = now()
 
         try:
-            osm_api = OpenStreetMapAPI()
+            osm_api = OpenStreetMapAPI(timeout=timeout)
 
             if area:
                 print_cancellable(f"Fetching fountains in {area}...")
@@ -202,10 +212,10 @@ def fetch_fountains(
         try:
             if post:
                 method = 'POST'
-                console.print(post_fountains_to_url(requests.post, fountains, post, timeout))
+                post_fountains_to_url(method, requests.post, fountains, post, timeout)
             elif put:
                 method = 'PUT'
-                console.print(post_fountains_to_url(requests.put, fountains, put, timeout))
+                post_fountains_to_url(method, requests.put, fountains, put, timeout)
             else:
                 method = 'Save'
                 save_fountains_to_file(fountains, filename=fountains_filename(area, timestamp))
