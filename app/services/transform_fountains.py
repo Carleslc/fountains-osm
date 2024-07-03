@@ -18,14 +18,15 @@ def determine_type(tags: Dict[str, str]) -> Optional[FountainType]:
         return FountainType.WATERING_PLACE
     return None
 
+__OPERATIONAL_STATUS_MAP = {
+    "ok": True, "yes": True, "operational": True, "functional": True, "open": True,
+    "non-operational": False, "broken": False, "closed": False, "out_of_order": False, "needs_maintenance": False
+}
+
 def determine_operational_status(status: Optional[str]) -> Optional[bool]:
     if not status:
         return None
-    operational_status_map = {
-        "ok": True, "yes": True, "operational": True, "functional": True, "open": True,
-        "non-operational": False, "broken": False, "closed": False, "out_of_order": False, "needs_maintenance": False
-    }
-    return operational_status_map.get(status)
+    return __OPERATIONAL_STATUS_MAP.get(status)
 
 def determine_safe_water(tags: Dict[str, str]) -> Optional[SafeWater]:
     if tags.get('amenity') == 'drinking_water' or tags.get('drinking_water:legal') == "yes" or tags.get('drinking_water') == "treated":
