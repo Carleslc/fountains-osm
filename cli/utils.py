@@ -47,7 +47,7 @@ def check_url_method(url: str, method: str = 'POST'):
         options = requests.options(url, timeout=10)
 
         if options.status_code in [200, 204]:
-            allow_header = options.headers.get('Allow')
+            allow_header = options.headers.get('Allow') or options.headers.get('Access-Control-Allow-Methods')
 
             if allow_header:
                 allowed_methods = [method.strip() for method in allow_header.split(',')]
