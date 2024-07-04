@@ -1,4 +1,4 @@
-from typing import Tuple, Optional
+from typing import Any, Tuple, Optional
 
 from datetime import datetime, timezone
 
@@ -24,7 +24,7 @@ def error(message: str):
     err_console.print(f"ERROR: {message}")
     raise typer.Exit(code=1)
 
-def debug(message: str, highlight: bool = False):
+def debug(message: Any, highlight: bool = False):
     console.print(message, style="debug", highlight=highlight)
 
 def print_cancellable(message: str, style: Optional[str] = None):
@@ -43,16 +43,19 @@ def debug_time(time_name: str, start_timestamp: datetime) -> Tuple[datetime, flo
     return current_timestamp, total_seconds_elapsed
 
 def check_url_method(url: str, method: str = 'POST'):
-    allowed_methods = []
-
     try:
         options = requests.options(url, timeout=10)
 
-        if options.status_code == 200:
-            allowed_methods = options.headers.get('Allow', '')
+        if options.status_code in [200, 204]:
+            allow_header = options.headers.get('Allow')
 
-            if method not in allowed_methods:
-                error(f"{method} not allowed for URL {url}")
+            if allow_header:
+                allowed_methods = [method.strip() for method in allow_header.split(',')]
+
+                if method not in allowed_methods:
+                    error(f"{method} not allowed for URL {url}")
+            
+            # Assume method is allowed if successful response but Allow header is not present
         else:
             error(f"{method} not allowed for URL {url} ({options.status_code})")
     except requests.ConnectionError:
