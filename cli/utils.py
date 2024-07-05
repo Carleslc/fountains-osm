@@ -1,4 +1,4 @@
-from typing import Any, Tuple, Optional
+from typing import Any, List, Tuple, Optional
 
 from datetime import datetime, timezone
 
@@ -74,3 +74,8 @@ def format_size(size_bytes: float) -> str:
 
 def file_size(file_path: str) -> float:
     return os.path.getsize(file_path)
+
+def batches(l: List[Any], size: int):
+    """Yield successive chunks of a specific size for list l."""
+    for i in range(0, len(l), size):
+        yield l[i:i + size]

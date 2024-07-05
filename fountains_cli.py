@@ -9,7 +9,7 @@ import requests
 
 from rich.table import Table
 
-from cli.utils import console, error, debug, debug_time, print_cancellable, now, check_url_method, file_size, format_size
+from cli.utils import console, error, debug, debug_time, print_cancellable, batches, now, check_url_method, file_size, format_size
 
 from app.models.fountain import FountainOpenStreetMap
 from app.services.openstreetmap_api import OpenStreetMapAPI
@@ -20,6 +20,7 @@ CLI_NAME = os.path.basename(__file__)
 LOG_FILE = ".fountains_cli.log"
 LOG_FILE_ENCODING = "utf8"
 MAX_LOGS = 100
+REQUEST_BATCH_SIZE = 1000
 
 app = typer.Typer(context_settings={ "help_option_names": ["-h", "--help"] })
 
@@ -38,18 +39,24 @@ def save_fountains_to_file(fountains: List[FountainOpenStreetMap], filename: str
     console.print(f"({format_size(file_size(filename))})", style="dim")
 
 def post_fountains_to_url(request_type: str, request_method: Callable[..., requests.Response], fountains: List[FountainOpenStreetMap], endpoint_url: str, timeout: int):
-    console.print(request_type, end=' ')
-    console.print(endpoint_url, style="file", highlight=False)
-
     headers = { 'Content-Type': 'application/json' }
-    response = request_method(endpoint_url, json=fountains_body(fountains), headers=headers, timeout=timeout)
 
-    console.print(f"{request_type} ({response.status_code})")
-    response_body = response.json() if response.content else None
-    print_response(response_body)
-    
-    response.raise_for_status()
-    return response_body
+    i = 0
+
+    for batch in batches(fountains, REQUEST_BATCH_SIZE):
+        console.print(request_type, end=' ')
+        console.print(endpoint_url, style="file", highlight=False, end=' ')
+        console.print(f"{i} .. {min(i + REQUEST_BATCH_SIZE, len(fountains))}")
+
+        response = request_method(endpoint_url, json=fountains_body(batch), headers=headers, timeout=timeout)
+
+        console.print(f"{request_type} ({response.status_code})")
+        response_body = response.json() if response.content else None
+        print_response(response_body)
+
+        response.raise_for_status()
+
+        i += REQUEST_BATCH_SIZE
 
 def print_response(response: Optional[str] = None):
     if response:
