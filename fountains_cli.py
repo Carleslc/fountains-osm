@@ -97,22 +97,24 @@ def log_request(logs: List[Dict[str, Any]],
     with open(LOG_FILE, 'w', encoding=LOG_FILE_ENCODING) as log_file:
         json.dump(logs, log_file, indent=4)
 
-def since_latest_log(logs: List[Dict[str, Any]], area: Optional[str]) -> Optional[datetime]:
+def since_latest_log(logs: List[Dict[str, Any]], area: Optional[str],
+                     post: Optional[str], put: Optional[str]) -> Optional[datetime]:
     parameter_area = area.lower() if area else None
 
     for log in reversed(logs): # logs are ordered by timestamp (ascending)
         log_area = log["area"].lower() if log.get("area") else None
 
-        if log_area == parameter_area:
+        if log_area == parameter_area and (log.get("post") == post and log.get("put") == put):
             return datetime.fromisoformat(log["timestamp"]) # latest timestamp
 
     return None
 
-def update_since(logs: List[Dict[str, Any]], since: Optional[datetime], area: Optional[str]) -> Optional[datetime]:
+def update_since(logs: List[Dict[str, Any]], since: Optional[datetime], area: Optional[str],
+                 post: Optional[str], put: Optional[str]) -> Optional[datetime]:
     if since:
         debug(f"Update: --since {since.isoformat()} (explicitly specified)")
     else:
-        since = since_latest_log(logs, area)
+        since = since_latest_log(logs, area, post, put)
 
         if since:
             debug(f"Update: --since {since.isoformat()}")
@@ -181,14 +183,15 @@ def fetch_fountains(
     Fetch fountains data from OpenStreetMap and save to file or post to a url.
     """
     if context.invoked_subcommand is None: # main command (no subcommand)
-        if post or put:
-            check_url: str = post or put # type: ignore
+        check_url: str | None = post or put
+
+        if check_url:
             check_url_method(check_url, 'POST' if post else 'PUT')
 
         logs = load_logs()
 
         if update:
-            since = update_since(logs, since, area)
+            since = update_since(logs, since, area, post, put)
 
         timestamp = now()
 
