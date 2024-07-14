@@ -75,7 +75,7 @@ def format_size(size_bytes: float) -> str:
 def file_size(file_path: str) -> float:
     return os.path.getsize(file_path)
 
-def batches(l: List[Any], size: int) -> Generator[Tuple[int, int, List[Any]]]:
+def batches(l: List[Any], size: int) -> Generator[Tuple[int, int, List[Any]], None, None]:
     """Yield successive chunks of a specific size for list l."""
     len_l = len(l)
     for i in range(0, len_l, size):
