@@ -1,11 +1,13 @@
 from typing import Any, List, Dict, Callable, Optional
 
-from datetime import datetime
-
 import os.path
 import json
 import typer
 import requests
+
+from datetime import datetime
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from rich.table import Table
 
@@ -20,6 +22,7 @@ CLI_NAME = os.path.basename(__file__)
 LOG_FILE = ".fountains_cli.log"
 LOG_FILE_ENCODING = "utf8"
 MAX_LOGS = 100
+REQUEST_MAX_THREADS = 100
 REQUEST_BATCH_SIZE = 1000
 
 app = typer.Typer(context_settings={ "help_option_names": ["-h", "--help"] })
@@ -38,25 +41,37 @@ def save_fountains_to_file(fountains: List[FountainOpenStreetMap], filename: str
     console.print(filename, style="file", highlight=False, end=' ')
     console.print(f"({format_size(file_size(filename))})", style="dim")
 
-def post_fountains_to_url(request_type: str, request_method: Callable[..., requests.Response], fountains: List[FountainOpenStreetMap], endpoint_url: str, timeout: int):
+def post_fountains_to_url(request_type: str, request_method: Callable[..., requests.Response],
+                          fountains: List[FountainOpenStreetMap], endpoint_url: str, timeout: int,
+                          batch_size: int = REQUEST_BATCH_SIZE):
     headers = { 'Content-Type': 'application/json' }
 
-    i = 0
+    console.print(request_type, end=' ')
+    console.print(endpoint_url, style="file", highlight=False)
 
-    for batch in batches(fountains, REQUEST_BATCH_SIZE):
-        console.print(request_type, end=' ')
-        console.print(endpoint_url, style="file", highlight=False, end=' ')
-        console.print(f"{i} .. {min(i + REQUEST_BATCH_SIZE, len(fountains))}")
+    def parallel_request(batch: List[FountainOpenStreetMap], start_index: int, end_index: int):
+        batch_range = f"{start_index} .. {end_index}"
+        console.print(batch_range)
 
         response = request_method(endpoint_url, json=fountains_body(batch), headers=headers, timeout=timeout)
 
-        console.print(f"{request_type} ({response.status_code})")
-        response_body = response.json() if response.content else None
-        print_response(response_body)
+        return response, batch_range
 
-        response.raise_for_status()
+    with ThreadPoolExecutor(max_workers=REQUEST_MAX_THREADS, thread_name_prefix='fountains_cli_request') as executor:
+        request_futures = []
 
-        i += REQUEST_BATCH_SIZE
+        for start_index, end_index, batch in batches(fountains, batch_size):
+            request_futures.append(executor.submit(parallel_request, batch, start_index, end_index))
+
+        for request_future in as_completed(request_futures):
+            response, batch_range = request_future.result()
+
+            console.print(f"{request_type} {batch_range} ({response.status_code})")
+
+            response_body = response.json() if response.content else None
+            print_response(response_body)
+
+            response.raise_for_status()
 
 def print_response(response: Optional[str] = None):
     if response:

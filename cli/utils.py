@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple, Optional
+from typing import Any, List, Tuple, Generator, Optional
 
 from datetime import datetime, timezone
 
@@ -75,7 +75,10 @@ def format_size(size_bytes: float) -> str:
 def file_size(file_path: str) -> float:
     return os.path.getsize(file_path)
 
-def batches(l: List[Any], size: int):
+def batches(l: List[Any], size: int) -> Generator[Tuple[int, int, List[Any]]]:
     """Yield successive chunks of a specific size for list l."""
-    for i in range(0, len(l), size):
-        yield l[i:i + size]
+    len_l = len(l)
+    for i in range(0, len_l, size):
+        start_index = i
+        end_index = min(i + size, len_l)
+        yield start_index, end_index, l[start_index:end_index]
