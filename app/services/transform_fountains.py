@@ -10,9 +10,9 @@ from app.models.fountain import FountainOpenStreetMap, FountainOpenStreetMapInfo
 def determine_type(tags: Dict[str, str]) -> Optional[FountainType]:
     if tags.get('natural') == 'spring':
         return FountainType.NATURAL
-    if tags.get('man_made') == 'water_tap':
-        return FountainType.TAP_WATER
     if tags.get('amenity') == 'drinking_water':
+        return FountainType.TAP_WATER
+    if tags.get('man_made') == 'water_tap':
         return FountainType.TAP_WATER
     if tags.get('amenity') == 'watering_place':
         return FountainType.WATERING_PLACE
