@@ -10,6 +10,8 @@ import typer
 from rich.console import Console
 from rich.theme import Theme
 
+from json.decoder import JSONDecodeError
+
 theme = Theme({
     "debug": "dim",
     "file": "grey50"
@@ -29,6 +31,16 @@ def debug(message: Any, highlight: bool = False):
 
 def print_cancellable(message: str, style: Optional[str] = None):
     console.print(f"{message} [dim](Ctrl^C to cancel)[/dim]", style=style)
+
+def print_response(response: Optional[requests.Response]):
+    if response:
+        try:
+            response_body = response.json() if response.content else None
+        except JSONDecodeError:
+            response_body = response.text
+
+        if response_body:
+            console.print(response, style='debug')
 
 def debug_time(time_name: str, start_timestamp: datetime) -> Tuple[datetime, float]:
     current_timestamp = now()
