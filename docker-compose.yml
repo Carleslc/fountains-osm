@@ -5,5 +5,36 @@ services:
       dockerfile: Dockerfile
     container_name: fountains-osm
     ports:
-      - "8000:80"
+      - "8001:80"
     restart: unless-stopped
+    networks:
+      - fountains_osm_network
+
+  fountains-cli:
+    build:
+      context: .
+      dockerfile: Dockerfile.cli
+    image: fountains-cli:latest
+    container_name: fountains-cli
+    environment:
+      - FOUNTAINS_CLI=${FOUNTAINS_CLI}
+    command: ["sh", "-c", "python /fountains-cli/fountains_cli.py --update ${FOUNTAINS_CLI}"]
+    volumes:
+      - ./logs:/fountains-cli/logs/
+    networks:
+      - fountains_cli_network
+  
+  providers-cli:
+    image: fountains-cli:latest
+    container_name: providers-cli
+    environment:
+      - PROVIDERS_CLI=${PROVIDERS_CLI}
+    command: ["sh", "-c", "python /fountains-cli/providers_cli.py ${PROVIDERS_CLI}"]
+    networks:
+      - fountains_cli_network
+
+networks:
+  fountains_osm_network:
+    driver: bridge
+  fountains_cli_network:
+    driver: bridge

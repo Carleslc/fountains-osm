@@ -1,0 +1,17 @@
+# fountains-cli update
+FROM python:3.12
+
+WORKDIR /fountains-cli
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+COPY .env.template .env
+
+COPY ./app /fountains-cli/app
+COPY ./queries /fountains-cli/queries
+COPY ./cli /fountains-cli/cli
+
+COPY fountains_cli.py /fountains-cli/fountains_cli.py
+COPY providers_cli.py /fountains-cli/providers_cli.py

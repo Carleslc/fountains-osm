@@ -5,7 +5,8 @@ __pycache__/
 .env
 
 # CLI files
-.fountains_cli.log
+logs/
+fountains_cli.log*
 fountains-*.json
 
 # Other

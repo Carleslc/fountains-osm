@@ -12,7 +12,7 @@ import requests
 from rich.table import Table
 
 from cli.utils import console, error, debug, debug_time, print_cancellable, print_response, \
-      batches, now, check_url_method, file_size, format_size
+      batches, now, check_url_method, file_size, format_size, parse_headers
 
 from app.models.fountain import FountainOpenStreetMap
 from app.services.openstreetmap_api import OpenStreetMapAPI
@@ -20,7 +20,7 @@ from app.services.transform_fountains import transform_fountains_osm
 from app.errors import RequestError
 
 CLI_NAME = os.path.basename(__file__)
-LOG_FILE = ".fountains_cli.log"
+LOG_FILE = os.path.join("logs", "fountains_cli.log")
 LOG_FILE_ENCODING = "utf8"
 MAX_LOGS = 100
 REQUEST_MAX_THREADS = 10
@@ -32,7 +32,7 @@ app = typer.Typer(context_settings={ "help_option_names": ["-h", "--help"] })
 
 def fountains_filename(area: Optional[str], timestamp: datetime) -> str:
     timestamp_iso = timestamp.isoformat(timespec='seconds').replace('+00:00', 'Z')
-    return f"fountains-{area or 'World'}-{timestamp_iso}.json"
+    return os.path.join("logs", f"fountains-{area or 'World'}-{timestamp_iso}.json")
 
 def fountains_body(fountains: List[FountainOpenStreetMap]) -> List[Dict[str, Any]]:
     return [fountain.model_dump(mode='json', exclude_none=True) for fountain in fountains]
@@ -46,14 +46,18 @@ def save_fountains_to_file(fountains: List[FountainOpenStreetMap], filename: str
 
 def post_fountains_to_url(request_type: str, request_method: Callable[..., requests.Response],
                           fountains: List[FountainOpenStreetMap], endpoint_url: str, timeout: int,
-                          batch_size: int = REQUEST_BATCH_SIZE, retries: int = REQUEST_MAX_RETRIES):
-    headers = { 'Content-Type': 'application/json' }
+                          batch_size: int = REQUEST_BATCH_SIZE, retries: int = REQUEST_MAX_RETRIES,
+                          headers: Optional[Dict[str, str]] = None):
+    request_headers = { 'Content-Type': 'application/json' }
+
+    if headers:
+        request_headers.update(headers)
 
     console.print(request_type, end=' ')
     console.print(endpoint_url, style="file", highlight=False)
 
     def make_request(batch_range: str, json_body: Any) -> requests.Response:
-        response = request_method(endpoint_url, json=json_body, headers=headers, timeout=timeout)
+        response = request_method(endpoint_url, json=json_body, headers=request_headers, timeout=timeout)
 
         console.print(f"{request_type} {batch_range} ({response.status_code})")
 
@@ -203,7 +207,8 @@ def fetch_fountains(
     osm: bool = typer.Option(False, "--osm", help="Include OSM extra information (type, id, version, url, tags)"),
     timeout: int = typer.Option(1800, help="Timeout in seconds for the OSM API request (default 30 minutes)"),
     post: Optional[str] = typer.Option(None, help="URL to POST the fountains data"),
-    put: Optional[str] = typer.Option(None, help="URL to PUT the fountains data")
+    put: Optional[str] = typer.Option(None, help="URL to PUT the fountains data"),
+    headers: Optional[List[str]] = typer.Option(None, "--header", help="Headers to include in the request")
 ):
     """
     Fetch fountains data from OpenStreetMap and save to file or post to a url.
@@ -248,10 +253,10 @@ def fetch_fountains(
         try:
             if post:
                 method = 'POST'
-                post_fountains_to_url(method, requests.post, fountains, post, timeout)
+                post_fountains_to_url(method, requests.post, fountains, post, timeout, headers=parse_headers(headers))
             elif put:
                 method = 'PUT'
-                post_fountains_to_url(method, requests.put, fountains, put, timeout)
+                post_fountains_to_url(method, requests.put, fountains, put, timeout, headers=parse_headers(headers))
             else:
                 method = 'Save'
                 save_fountains_to_file(fountains, filename=fountains_filename(area, timestamp))

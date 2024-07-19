@@ -1,6 +1,8 @@
-from typing import Any, List, Tuple, Generator, Optional
+from typing import Any, List, Dict, Tuple, Generator, Optional
 
 from datetime import datetime, timezone
+
+from json.decoder import JSONDecodeError
 
 import math
 import os.path
@@ -9,8 +11,6 @@ import typer
 
 from rich.console import Console
 from rich.theme import Theme
-
-from json.decoder import JSONDecodeError
 
 theme = Theme({
     "debug": "dim",
@@ -74,6 +74,16 @@ def check_url_method(url: str, method: str = 'POST'):
         error(f"Invalid URL {url} (Connection Error)")
     except requests.RequestException as e:
         error(f"Invalid URL {url}: {str(e)}")
+
+def parse_headers(headers: Optional[List[str]] = []) -> Optional[Dict[str, str]]:
+    request_headers = {}
+
+    if headers:
+        for header in headers:
+            key, value = header.split("=", 1)
+            request_headers[key.strip()] = value.strip()
+
+    return request_headers
 
 def format_size(size_bytes: float) -> str:
     if size_bytes == 0:
