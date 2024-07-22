@@ -41,12 +41,12 @@
   nwr["man_made"="water_tap"]["access"="yes"]{search};
 
   // https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dwater_point
-  nwr["amenity"="water_point"][!"access"](area.searchArea);
-  nwr["amenity"="water_point"]["access"="yes"](area.searchArea);
+  nwr["amenity"="water_point"][!"access"]{search};
+  nwr["amenity"="water_point"]["access"="yes"]{search};
   
   // https://wiki.openstreetmap.org/wiki/Tag:waterway%3Dwater_point
-  nwr["waterway"="water_point"][!"access"](area.searchArea);
-  nwr["waterway"="water_point"]["access"="yes"](area.searchArea);
+  nwr["waterway"="water_point"][!"access"]{search};
+  nwr["waterway"="water_point"]["access"="yes"]{search};
 );
 out meta center qt;
 // https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#out
