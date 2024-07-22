@@ -33,14 +33,14 @@ def print_cancellable(message: str, style: Optional[str] = None):
     console.print(f"{message} [dim](Ctrl^C to cancel)[/dim]", style=style)
 
 def print_response(response: Optional[requests.Response]):
-    if response:
+    if response is not None:
         try:
             response_body = response.json() if response.content else None
         except JSONDecodeError:
             response_body = response.text
 
         if response_body:
-            console.print(response, style='debug')
+            console.print(response_body, style='debug')
 
 def debug_time(time_name: str, start_timestamp: datetime) -> Tuple[datetime, float]:
     current_timestamp = now()
