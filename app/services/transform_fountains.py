@@ -21,6 +21,20 @@ def determine_type(tags: Dict[str, str]) -> Optional[FountainType]:
         return FountainType.TAP_WATER
     return None
 
+def determine_name(tags: Dict[str, str]) -> Optional[str]:
+    name = tags.get('name') or tags.get('name:en') or tags.get('name:es')
+    if name:
+        return name
+    for key, value in tags.items():
+        if key.startswith('name:'):
+            return value
+    return None
+
+def determine_picture(tags: Dict[str, str]) -> Optional[str]:
+    if 'image' in tags and is_url(tags['image']):
+        return tags['image']
+    return None
+
 __OPERATIONAL_STATUS_MAP = {
     "ok": True, "yes": True, "operational": True, "functional": True, "open": True,
     "non-operational": False, "broken": False, "closed": False, "out_of_order": False, "needs_maintenance": False
@@ -73,18 +87,12 @@ def determine_description(tags: Dict[str, str]) -> Optional[str]:
     if 'description:en' in tags:
         return tags['description:en']
     for key, value in tags.items():
-        if key.startswith('description'):
+        if key.startswith('description:'):
             return value
     if 'note' in tags:
         return tags['note']
     if 'drive_water:description' in tags:
         return tags['drive_water:description']
-    if 'wikipedia' in tags:
-        wiki_url = osm_tag_to_wikipedia_url(tags['wikipedia'])
-        if wiki_url:
-            return wiki_url
-    if 'source' in tags and is_url(tags['source']):
-        return tags['source']
     if 'addr:housenumber' in tags:
         if 'addr:street' in tags:
             return f"{tags['addr:street']}, {tags['addr:housenumber']}"
@@ -95,15 +103,37 @@ def determine_description(tags: Dict[str, str]) -> Optional[str]:
         return tags['operator']
     return None
 
-def osm_tag_to_wikipedia_url(tag: str) -> Optional[str]:
-    if ':' not in tag:
+def determine_website(tags: Dict[str, str]) -> Optional[str]:
+    if 'website' in tags and is_url(tags['website']):
+        return tags['website']
+    if 'wikipedia' in tags:
+        wiki_url = osm_tag_to_wikipedia_url(tags['wikipedia'])
+        if wiki_url:
+            return wiki_url
+    if 'source' in tags and is_url(tags['source']):
+        return tags['source']
+    return None
+
+def osm_tag_to_wikipedia_url(wiki_tag: str) -> Optional[str]:
+    if ':' not in wiki_tag:
         return None
-    language_code, page_name = tag.split(':', 1)
+    language_code, page_name = wiki_tag.split(':', 1)
     page_name = page_name.replace(' ', '_')
     return f"https://{language_code}.wikipedia.org/wiki/{page_name}"
 
+__URL_REGEX = re.compile(
+        # http:// or https://
+        r'^(https?://)'
+        # Domain name
+        r'(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})'
+        # Optional port number
+        r'(:[0-9]{1,5})?'
+        # Optional path
+        r'(/.*)?$',
+        re.IGNORECASE)
+
 def is_url(value: str) -> bool:
-    return value.startswith('http') # fast check
+    return __URL_REGEX.match(value) is not None
 
 def osm_url(osm_type: Literal["node", "way", "relation"], osm_id: str) -> str:
     return f"https://www.openstreetmap.org/{osm_type}/{osm_id}"
@@ -125,12 +155,14 @@ def transform_fountains_osm(osm_data: Dict[str, Any], include_osm: bool = False)
 
             tags = element.get("tags", {})
 
+            provider_osm_url = osm_url(element_type, element_id)
+
             fountain = FountainOpenStreetMap.model_construct( # without validation: trusted data source (x30 faster)
                 type=determine_type(tags),
                 lat=lat,
                 long=lon,
-                name=tags.get("name"),
-                picture=tags.get("image"),
+                name=determine_name(tags),
+                picture=determine_picture(tags),
                 description=determine_description(tags),
                 operational_status=determine_operational_status(tags),
                 safe_water=determine_safe_water(tags),
@@ -138,8 +170,10 @@ def transform_fountains_osm(osm_data: Dict[str, Any], include_osm: bool = False)
                 access_bottles=determine_access_bottles(tags),
                 access_pets=determine_access_pets(tags),
                 access_wheelchair=determine_access_wheelchair(tags),
+                website=determine_website(tags),
                 provider_id=f'{element_type}:{element_id}',
                 provider_updated_at=datetime.fromisoformat(element["timestamp"]), # before python 3.11: replace('Z', '+00:00')
+                provider_url=provider_osm_url
             )
 
             if include_osm:
@@ -148,7 +182,7 @@ def transform_fountains_osm(osm_data: Dict[str, Any], include_osm: bool = False)
                     id=element_id,
                     version=element["version"],
                     tags=tags,
-                    url=osm_url(element_type, element_id),
+                    url=provider_osm_url,
                 )
 
             transformed_data.append(fountain)

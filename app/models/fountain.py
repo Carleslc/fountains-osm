@@ -34,9 +34,11 @@ class Fountain(BaseModel):
     access_bottles: Optional[bool] = None
     access_pets: Optional[bool] = None
     access_wheelchair: Optional[bool] = None
+    website: Optional[str] = None
     provider_name: str
     provider_id: str
     provider_updated_at: datetime
+    provider_url: Optional[str] = None
 
 
 class FountainOpenStreetMap(Fountain):
