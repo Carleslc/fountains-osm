@@ -93,14 +93,53 @@ def determine_description(tags: Dict[str, str]) -> Optional[str]:
         return tags['note']
     if 'drive_water:description' in tags:
         return tags['drive_water:description']
-    if 'addr:housenumber' in tags:
-        if 'addr:street' in tags:
-            return f"{tags['addr:street']}, {tags['addr:housenumber']}"
-        return tags['addr:housenumber']
-    if 'addr:street' in tags:
-        return tags['addr:street']
     if 'operator' in tags:
         return tags['operator']
+    return None
+
+def determine_address(tags: Dict[str, str]) -> Optional[str]:
+    address_parts = []
+    if 'addr:street' in tags:
+        street = tags['addr:street']
+        if 'addr:suburb' in tags:
+            street += f" ({tags['addr:suburb']})"
+        if 'addr:streetnumber' in tags:
+            street += ' ' + tags['addr:streetnumber']
+        address_parts.append(street)
+    if 'addr:housename' in tags:
+        address_parts.append(tags['addr:housename'])
+    if 'addr:floor' in tags:
+        address_parts.append(tags['addr:floor'])
+    if 'addr:housenumber' in tags:
+        address_parts.append(tags['addr:housenumber'])
+    if 'addr:hamlet' in tags:
+        address_parts.append(tags['addr:hamlet'])
+    if 'addr:district' in tags:
+        district = tags['addr:district']
+        if 'addr:subdistrict' in tags:
+            district += f" ({tags['addr:subdistrict']})"
+        address_parts.append(district)
+    if 'addr:city' in tags:
+        city = tags['addr:city']
+        if 'addr:postcode' in tags:
+            city += f' ({tags['addr:postcode']})'
+        address_parts.append(city)
+    if 'addr:province' in tags:
+        address_parts.append(tags['addr:province'])
+    if 'addr:state' in tags:
+        address_parts.append(tags['addr:state'])
+    if 'addr:country' in tags:
+        address_parts.append(tags['addr:country'])
+    return ', '.join(address_parts) if address_parts else None
+
+def determine_access(tags: Dict[str, str]) -> Optional[str]:
+    return tags.get('access')
+
+def determine_fee(tags: Dict[str, str]) -> Optional[bool]:
+    if 'fee' in tags:
+        fee = tags['fee']
+        if fee != "unknown":
+            return fee == "yes"
     return None
 
 def determine_website(tags: Dict[str, str]) -> Optional[str]:
@@ -168,6 +207,9 @@ def transform_fountains_osm(osm_data: Dict[str, Any], include_osm: bool = False)
                 access_bottles=determine_access_bottles(tags),
                 access_pets=determine_access_pets(tags),
                 access_wheelchair=determine_access_wheelchair(tags),
+                access=determine_access(tags),
+                fee=determine_fee(tags),
+                address=determine_address(tags),
                 website=determine_website(tags),
                 provider_id=f'{element_type}:{element_id}',
                 provider_updated_at=datetime.fromisoformat(element["timestamp"]), # before python 3.11: replace('Z', '+00:00')

@@ -34,6 +34,9 @@ class Fountain(BaseModel):
     access_bottles: Optional[bool] = None
     access_pets: Optional[bool] = None
     access_wheelchair: Optional[bool] = None
+    access: Optional[str] = None
+    fee: Optional[bool] = None
+    address: Optional[str] = None
     website: Optional[str] = None
     provider_name: str
     provider_id: str
