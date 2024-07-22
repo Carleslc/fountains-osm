@@ -9,18 +9,19 @@ from app.models.provider import Provider
 
 app = typer.Typer(context_settings={ "help_option_names": ["-h", "--help"] })
 
-def post_provider_to_url(name: str, endpoint_url: str,
+def post_provider_to_url(endpoint_url: str,
+                         name: str, url: Optional[str],
                          headers: Optional[Dict[str, str]], timeout: int = 120, verbose: bool = True):
     request_headers = { 'Content-Type': 'application/json' }
 
     if headers:
         request_headers.update(headers)
 
-    provider_data = Provider(name=name).model_dump(mode='json')
+    provider_data = Provider(name=name, url=url).model_dump(mode='json')
 
     if verbose:
         console.print('POST', end=' ')
-        console.print(endpoint_url, style="file", highlight=False)  
+        console.print(endpoint_url, style="file", highlight=False)
 
     try:
         response = requests.post(endpoint_url, json=provider_data, headers=request_headers, timeout=timeout)
@@ -41,6 +42,7 @@ def post_provider_to_url(name: str, endpoint_url: str,
 @app.command()
 def add_provider(
     name: str = typer.Argument(..., help="Name of the provider to add"),
+    url: Optional[str] = typer.Option(None, help="Url of the provider to add"),
     post: str = typer.Option(..., help="URL to POST the provider data"),
     headers: Optional[List[str]] = typer.Option(None, "--header", help="Headers to include in the request"),
     quiet: bool = typer.Option(False, "--quiet", "-q", help="Display only important information"),
@@ -50,7 +52,7 @@ def add_provider(
     """
     check_url_method(post, 'POST')
 
-    post_provider_to_url(name, post, headers=parse_headers(headers), verbose=not quiet)
+    post_provider_to_url(post, name, url, headers=parse_headers(headers), verbose=not quiet)
 
 if __name__ == "__main__":
     app()

@@ -147,21 +147,22 @@ python fountains_cli.py logs
 `python providers_cli.py --help`
 
 ```
-Usage: providers_cli.py [OPTIONS] NAME                                                                                                                                                               
-                                                                                                                                                                                                      
- Add a new provider by making a POST request to the specified URL with optional headers.                                                                                                              
-                                                                                                                                                                                                      
-╭─ Arguments ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *    name      TEXT  Name of the provider to add [default: None] [required]                                                                                                                        │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ *  --post                        TEXT  URL to POST the provider data [default: None] [required]                                                                                                    │
-│    --header                      TEXT  Headers to include in the request [default: None]                                                                                                           │
-│    --quiet               -q            Display only important information                                                                                                                          │
-│    --install-completion                Install completion for the current shell.                                                                                                                   │
-│    --show-completion                   Show completion for the current shell, to copy it or customize the installation.                                                                            │
-│    --help                -h            Show this message and exit.                                                                                                                                 │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+Usage: providers_cli.py [OPTIONS] NAME                                                                                         
+                                                                                                                                
+ Add a new provider by making a POST request to the specified URL with optional headers.                                        
+                                                                                                                                
+╭─ Arguments ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *    name      TEXT  Name of the provider to add [default: None] [required]                                                  │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --url                         TEXT  Url of the provider to add [default: None]                                            │
+│ *  --post                        TEXT  URL to POST the provider data [default: None] [required]                              │
+│    --header                      TEXT  Headers to include in the request [default: None]                                     │
+│    --quiet               -q            Display only important information                                                    │
+│    --install-completion                Install completion for the current shell.                                             │
+│    --show-completion                   Show completion for the current shell, to copy it or customize the installation.      │
+│    --help                -h            Show this message and exit.                                                           │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 #### Add provider to an external endpoint
