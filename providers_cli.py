@@ -38,6 +38,9 @@ def post_provider_to_url(name: str, endpoint_url: str,
     except requests.RequestException as e:
         error(f"Failed to add provider: {e}")
 
+        if verbose and response:
+            print_response(response)
+
 @app.command()
 def add_provider(
     name: str = typer.Argument(..., help="Name of the provider to add"),
