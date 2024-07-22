@@ -25,8 +25,6 @@ def post_provider_to_url(name: str, endpoint_url: str,
     try:
         response = requests.post(endpoint_url, json=provider_data, headers=request_headers, timeout=timeout)
 
-        response.raise_for_status()
-
         if response.status_code == 201:
             console.print(f"Added Provider: {name}", style="green")
         elif response.status_code == 200:
@@ -35,11 +33,10 @@ def post_provider_to_url(name: str, endpoint_url: str,
         
         if verbose:
             print_response(response)
+        
+        response.raise_for_status()
     except requests.RequestException as e:
         error(f"Failed to add provider: {e}")
-
-        if verbose and response:
-            print_response(response)
 
 @app.command()
 def add_provider(
