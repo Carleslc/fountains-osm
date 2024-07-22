@@ -25,11 +25,11 @@ Run: `fastapi run app/main.py --workers 2`
 Using Docker:
 
 ```bash
-docker compose up --build -d
+docker compose up --build -d fountains-osm
 
 docker logs -f fountains-osm
 
-docker compose down
+docker compose down fountains-osm
 ```
 
 https://fastapi.tiangolo.com/deployment/docker
@@ -207,6 +207,7 @@ crontab -e
 Remove images if needed:
 
 ```sh
+docker compose down --rmi all fountains-cli
 docker rmi fountains-osm-fountains-cli
 docker rmi $(docker images fountains-osm-fountains-cli -q)
 ```
