@@ -10,12 +10,15 @@ from app.models.fountain import FountainOpenStreetMap, FountainOpenStreetMapInfo
 def determine_type(tags: Dict[str, str]) -> Optional[FountainType]:
     if tags.get('natural') == 'spring':
         return FountainType.NATURAL
-    if tags.get('amenity') == 'drinking_water':
+    amenity = tags.get('amenity')
+    if amenity == 'drinking_water':
         return FountainType.TAP_WATER
+    if amenity == 'watering_place':
+        return FountainType.WATERING_PLACE
+    if amenity == 'water_point' or tags.get('waterway') == 'water_point':
+        return FountainType.WATER_POINT
     if tags.get('man_made') == 'water_tap':
         return FountainType.TAP_WATER
-    if tags.get('amenity') == 'watering_place':
-        return FountainType.WATERING_PLACE
     return None
 
 __OPERATIONAL_STATUS_MAP = {
@@ -23,24 +26,27 @@ __OPERATIONAL_STATUS_MAP = {
     "non-operational": False, "broken": False, "closed": False, "out_of_order": False, "needs_maintenance": False
 }
 
-def determine_operational_status(status: Optional[str]) -> Optional[bool]:
-    if not status:
-        return None
-    return __OPERATIONAL_STATUS_MAP.get(status)
+def determine_operational_status(tags: Dict[str, str]) -> Optional[bool]:
+    status = tags.get('operational_status')
+    return __OPERATIONAL_STATUS_MAP.get(status) if status else None
 
 def determine_safe_water(tags: Dict[str, str]) -> Optional[SafeWater]:
-    if tags.get('amenity') == 'drinking_water' or tags.get('drinking_water:legal') == "yes" or tags.get('drinking_water') == "treated":
-        return SafeWater.YES
-    if tags.get('drinking_water') == "yes":
-        return SafeWater.PROBABLY
-    if tags.get('drinking_water') == "no":
+    drinking_water = tags.get('drinking_water')
+    if drinking_water == "no":
         return SafeWater.NO
+    amenity = tags.get('amenity')
+    if amenity == 'drinking_water' or drinking_water == "treated" or tags.get('drinking_water:legal') == "yes":
+        return SafeWater.YES
+    if amenity == 'water_point' or drinking_water in ("yes", "conditional"):
+        return SafeWater.PROBABLY
     return None
 
 def determine_legal_water(tags: Dict[str, str]) -> Optional[LegalWater]:
-    if tags.get('drinking_water:legal') == "yes" or tags.get('drinking_water') == "treated":
+    drinking_water = tags.get('drinking_water')
+    drinking_water_legal = tags.get('drinking_water:legal')
+    if drinking_water_legal == "yes" or drinking_water == "treated":
         return LegalWater.TREATED
-    if tags.get('drinking_water:legal') == "no" or tags.get('drinking_water') == "untreated":
+    if drinking_water_legal == "no" or drinking_water == "untreated":
         return LegalWater.UNTREATED
     return None
 
@@ -71,12 +77,20 @@ def determine_description(tags: Dict[str, str]) -> Optional[str]:
             return value
     if 'note' in tags:
         return tags['note']
+    if 'drive_water:description' in tags:
+        return tags['drive_water:description']
     if 'wikipedia' in tags:
         wiki_url = osm_tag_to_wikipedia_url(tags['wikipedia'])
         if wiki_url:
             return wiki_url
     if 'source' in tags and is_url(tags['source']):
         return tags['source']
+    if 'addr:housenumber' in tags:
+        if 'addr:street' in tags:
+            return f"{tags['addr:street']}, {tags['addr:housenumber']}"
+        return tags['addr:housenumber']
+    if 'addr:street' in tags:
+        return tags['addr:street']
     if 'operator' in tags:
         return tags['operator']
     return None
@@ -118,7 +132,7 @@ def transform_fountains_osm(osm_data: Dict[str, Any], include_osm: bool = False)
                 name=tags.get("name"),
                 picture=tags.get("image"),
                 description=determine_description(tags),
-                operational_status=determine_operational_status(tags.get("operational_status")),
+                operational_status=determine_operational_status(tags),
                 safe_water=determine_safe_water(tags),
                 legal_water=determine_legal_water(tags),
                 access_bottles=determine_access_bottles(tags),

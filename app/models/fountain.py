@@ -8,6 +8,7 @@ from pydantic import BaseModel
 class FountainType(str, Enum):
     NATURAL = "natural"
     TAP_WATER = "tap_water"
+    WATER_POINT = "water_point"
     WATERING_PLACE = "watering_place"
 
 class SafeWater(str, Enum):
