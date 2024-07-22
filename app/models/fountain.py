@@ -50,4 +50,3 @@ class FountainOpenStreetMapInfo(BaseModel):
     id: int
     version: int
     tags: Optional[Dict[str, Any]] = None
-    url: Optional[str] = None

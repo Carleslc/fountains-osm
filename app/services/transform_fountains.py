@@ -155,8 +155,6 @@ def transform_fountains_osm(osm_data: Dict[str, Any], include_osm: bool = False)
 
             tags = element.get("tags", {})
 
-            provider_osm_url = osm_url(element_type, element_id)
-
             fountain = FountainOpenStreetMap.model_construct( # without validation: trusted data source (x30 faster)
                 type=determine_type(tags),
                 lat=lat,
@@ -173,7 +171,7 @@ def transform_fountains_osm(osm_data: Dict[str, Any], include_osm: bool = False)
                 website=determine_website(tags),
                 provider_id=f'{element_type}:{element_id}',
                 provider_updated_at=datetime.fromisoformat(element["timestamp"]), # before python 3.11: replace('Z', '+00:00')
-                provider_url=provider_osm_url
+                provider_url=osm_url(element_type, element_id)
             )
 
             if include_osm:
@@ -181,8 +179,7 @@ def transform_fountains_osm(osm_data: Dict[str, Any], include_osm: bool = False)
                     type=element_type,
                     id=element_id,
                     version=element["version"],
-                    tags=tags,
-                    url=provider_osm_url,
+                    tags=tags
                 )
 
             transformed_data.append(fountain)
