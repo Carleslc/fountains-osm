@@ -201,7 +201,7 @@ Add a cron job to the server:
 
 ```sh
 # Edit cron jobs
-crontab -e
+sudo crontab -e
 
 # Update fountains every day at 23:55
 55 23 * * * $PWD/update_fountains.sh
@@ -213,4 +213,10 @@ Remove images if needed:
 
 ```sh
 docker compose down --rmi all fountains-cli providers-cli
+```
+
+Remove updated cache logs (retrieve all fresh data):
+
+```sh
+sudo rm -rf logs
 ```
