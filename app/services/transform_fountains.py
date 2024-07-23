@@ -5,7 +5,7 @@ import re
 from datetime import datetime
 
 from app.errors import RequestTimeoutError, OpenStreetMapError
-from app.models.fountain import FountainOpenStreetMap, FountainOpenStreetMapInfo, FountainType, SafeWater, LegalWater
+from app.models.fountain import FountainOpenStreetMap, FountainOpenStreetMapInfo, FountainType, SafeWater, LegalWater, Access
 
 def determine_type(tags: Dict[str, str]) -> Optional[FountainType]:
     if tags.get('natural') == 'spring':
@@ -132,8 +132,24 @@ def determine_address(tags: Dict[str, str]) -> Optional[str]:
         address_parts.append(tags['addr:country'])
     return ', '.join(address_parts) if address_parts else None
 
-def determine_access(tags: Dict[str, str]) -> Optional[str]:
-    return tags.get('access')
+def determine_access(tags: Dict[str, str]) -> Optional[Access]:
+    if 'access' in tags:
+        access = tags['access']
+        if access in ('yes', 'public'):
+            return Access.YES
+        if access == 'permissive':
+            return Access.PERMISSIVE
+        if access == 'customers':
+            return Access.CUSTOMERS
+        if access == 'permit':
+            return Access.PERMIT
+        if access in ('private', 'military'):
+            return Access.PRIVATE
+        if access == 'no':
+            return Access.NO
+        if access == 'unknown':
+            return Access.UNKNOWN
+    return None
 
 def determine_fee(tags: Dict[str, str]) -> Optional[bool]:
     if 'fee' in tags:

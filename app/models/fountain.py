@@ -20,6 +20,15 @@ class LegalWater(str, Enum):
     TREATED = "treated"
     UNTREATED = "untreated"
 
+class Access(str, Enum):
+    YES = "yes"
+    PERMISSIVE = "permissive"
+    CUSTOMERS = "customers"
+    PERMIT = "permit"
+    PRIVATE = "private"
+    NO = "no"
+    UNKNOWN = "unknown"
+
 
 class Fountain(BaseModel):
     type: Optional[FountainType] = None
@@ -34,7 +43,7 @@ class Fountain(BaseModel):
     access_bottles: Optional[bool] = None
     access_pets: Optional[bool] = None
     access_wheelchair: Optional[bool] = None
-    access: Optional[str] = None
+    access: Optional[Access] = None
     fee: Optional[bool] = None
     address: Optional[str] = None
     website: Optional[str] = None
