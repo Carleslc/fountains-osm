@@ -165,8 +165,14 @@ def determine_website(tags: Dict[str, str]) -> Optional[str]:
         wiki_url = osm_tag_to_wikipedia_url(tags['wikipedia'])
         if wiki_url:
             return wiki_url
+    if 'contact:website' in tags and is_url(tags['contact:website']):
+        return tags['contact:website']
+    if 'source:url' in tags and is_url(tags['source:url']):
+        return tags['source:url']
     if 'source' in tags and is_url(tags['source']):
         return tags['source']
+    if 'url' in tags and is_url(tags['url']):
+        return tags['url']
     return None
 
 def osm_tag_to_wikipedia_url(wiki_tag: str) -> Optional[str]:
