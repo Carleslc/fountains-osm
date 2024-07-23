@@ -212,7 +212,7 @@ sudo crontab -e
 Remove images if needed:
 
 ```sh
-docker compose down --rmi all fountains-cli providers-cli
+docker compose down fountains-cli providers-cli --rmi all
 ```
 
 Remove updated cache logs (retrieve all fresh data):
