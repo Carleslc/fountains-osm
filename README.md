@@ -212,7 +212,5 @@ crontab -e
 Remove images if needed:
 
 ```sh
-docker compose down --rmi all fountains-cli
-docker rmi fountains-osm-fountains-cli
-docker rmi $(docker images fountains-osm-fountains-cli -q)
+docker compose down --rmi all fountains-cli providers-cli
 ```
