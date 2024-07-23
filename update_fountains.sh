@@ -20,7 +20,7 @@ if [ -n "$PROVIDERS_CLI" ]; then
 
   # Wait for providers-cli to finish
   PROVIDERS_CLI_CONTAINER_ID=$(docker compose --env-file .env ps -q providers-cli)
-  docker wait $PROVIDERS_CLI_CONTAINER_ID
+  docker wait $PROVIDERS_CLI_CONTAINER_ID > /dev/null
 
   # Check if providers-cli exited successfully
   PROVIDERS_CLI_EXIT_CODE=$(docker inspect $PROVIDERS_CLI_CONTAINER_ID --format='{{.State.ExitCode}}')
