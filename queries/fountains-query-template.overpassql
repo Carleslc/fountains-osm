@@ -25,28 +25,22 @@
 // area(id:3601311341)->.searchArea;
 {area_id}(
   // https://wiki.openstreetmap.org/wiki/Tag:amenity%3Ddrinking_water
-  nwr["amenity"="drinking_water"][!"access"]{search};
-  nwr["amenity"="drinking_water"]["access"="yes"]{search};
+  nwr["amenity"="drinking_water"]{search};
   
   // https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dwatering_place
-  nwr["amenity"="watering_place"][!"access"]{search};
-  nwr["amenity"="watering_place"]["access"="yes"]{search};
+  nwr["amenity"="watering_place"]{search};
   
   // https://wiki.openstreetmap.org/wiki/Tag:natural%3Dspring
-  nwr["natural"="spring"][!"access"]{search};
-  nwr["natural"="spring"]["access"="yes"]{search};
+  nwr["natural"="spring"]{search};
 
   // https://wiki.openstreetmap.org/wiki/Tag:man_made%3Dwater_tap
-  nwr["man_made"="water_tap"][!"access"]{search};
-  nwr["man_made"="water_tap"]["access"="yes"]{search};
+  nwr["man_made"="water_tap"]{search};
 
   // https://wiki.openstreetmap.org/wiki/Tag:amenity%3Dwater_point
-  nwr["amenity"="water_point"][!"access"]{search};
-  nwr["amenity"="water_point"]["access"="yes"]{search};
+  nwr["amenity"="water_point"]{search};
   
   // https://wiki.openstreetmap.org/wiki/Tag:waterway%3Dwater_point
-  nwr["waterway"="water_point"][!"access"]{search};
-  nwr["waterway"="water_point"]["access"="yes"]{search};
+  nwr["waterway"="water_point"]{search};
 );
 out meta center qt;
 // https://wiki.openstreetmap.org/wiki/Overpass_API/Overpass_QL#out
