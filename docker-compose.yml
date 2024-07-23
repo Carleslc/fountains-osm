@@ -15,7 +15,7 @@ services:
       context: .
       dockerfile: Dockerfile.cli
     image: fountains-cli:latest
-    container_name: fountains-cli
+    container_name: fountains-cli-update
     environment:
       - FOUNTAINS_CLI=${FOUNTAINS_CLI}
     command: ["sh", "-c", "python /fountains-cli/fountains_cli.py --update ${FOUNTAINS_CLI}"]
@@ -26,7 +26,7 @@ services:
   
   providers-cli:
     image: fountains-cli:latest
-    container_name: providers-cli
+    container_name: providers-cli-update
     environment:
       - PROVIDERS_CLI=${PROVIDERS_CLI}
     command: ["sh", "-c", "python /fountains-cli/providers_cli.py ${PROVIDERS_CLI}"]

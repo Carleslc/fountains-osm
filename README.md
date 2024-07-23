@@ -191,6 +191,10 @@ Run the script to check that it runs correctly:
 chmod +x update_fountains.sh
 
 ./update_fountains.sh
+
+# Check logs
+docker logs -f -t providers-cli-update
+docker logs -f -t fountains-cli-update
 ```
 
 Add a cron job to the server:

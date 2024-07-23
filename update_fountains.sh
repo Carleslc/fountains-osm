@@ -10,7 +10,7 @@ load_env
 
 if [ -n "$PROVIDERS_CLI" ]; then
   # Command for providers-cli
-  CMD_PROVIDERS="docker compose --env-file .env run --rm providers-cli"
+  CMD_PROVIDERS="docker compose --env-file .env up -d providers-cli"
 
   # Run providers-cli
   # echo $CMD_PROVIDERS
@@ -23,7 +23,7 @@ if [ -n "$PROVIDERS_CLI" ]; then
 fi
 
 # Command for fountains-cli
-CMD_FOUNTAINS="docker compose --env-file .env run --rm fountains-cli"
+CMD_FOUNTAINS="docker compose --env-file .env up -d fountains-cli"
 
 # Run fountains-cli
 # echo $CMD_FOUNTAINS
