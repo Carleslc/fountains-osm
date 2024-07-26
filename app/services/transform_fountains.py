@@ -30,9 +30,13 @@ def determine_name(tags: Dict[str, str]) -> Optional[str]:
             return value
     return None
 
+__IMGUR_URL = re.compile(r'(?:https?://)?(?:i\.)?imgur\.com/([a-zA-Z0-9]+)(?:\.jpe?g)?')
+
 def determine_picture(tags: Dict[str, str]) -> Optional[str]:
     if 'image' in tags and is_url(tags['image']):
-        return tags['image']
+        image_url = tags['image']
+        image_url = __IMGUR_URL.sub(r'https://i.imgur.com/\1.jpeg', image_url) # fix imgur links
+        return image_url
     return None
 
 __OPERATIONAL_STATUS_MAP = {
@@ -184,7 +188,7 @@ def osm_tag_to_wikipedia_url(wiki_tag: str) -> Optional[str]:
 
 __URL_REGEX = re.compile(
         # http:// or https://
-        r'^(https?://)'
+        r'^(https?://)?'
         # Domain name
         r'(([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,})'
         # Optional port number
