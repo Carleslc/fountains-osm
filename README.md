@@ -201,12 +201,15 @@ Add a cron job to the server:
 
 ```sh
 # Edit cron jobs
-sudo crontab -e
+crontab -e
 
 # Update fountains every day at 23:55
-55 23 * * * $PWD/update_fountains.sh
+55 23 * * * cd /path/fountains-osm/ && ./update_fountains.sh >> ./logs/cron.log 2>&1
 
-# Replace $PWD with the location of this folder
+# Replace /path/fountains-osm/ with the location of this folder
+
+# See cron jobs
+crontab -l
 ```
 
 Remove images if needed:
