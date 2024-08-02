@@ -25,18 +25,29 @@ def determine_name(tags: Dict[str, str]) -> Optional[str]:
     name = tags.get('name') or tags.get('name:en') or tags.get('name:es')
     if name:
         return name
-    for key, value in tags.items():
+    alt_name = tags.get('alt_name') or tags.get('alt_name:en') or tags.get('alt_name:es')
+    if alt_name:
+        return alt_name.split(';', maxsplit=1)[0]
+    other_name = tags.get('short_name') or tags.get('loc_name') or tags.get('official_name') or tags.get('reg_name')
+    if other_name:
+        return other_name
+    tags_items = tags.items()
+    for key, value in tags_items:
         if key.startswith('name:'):
             return value
+    for key, value in tags_items:
+        if key.startswith('alt_name:'):
+            return value.split(';', maxsplit=1)[0]
     return None
 
 __IMGUR_URL = re.compile(r'(?:https?://)?(?:i\.)?imgur\.com/([a-zA-Z0-9]+)(?:\.jpe?g)?')
 
+def __fix_imgur_link(image_url: str):
+    return __IMGUR_URL.sub(r'https://i.imgur.com/\1.jpeg', image_url)
+
 def determine_picture(tags: Dict[str, str]) -> Optional[str]:
     if 'image' in tags and is_url(tags['image']):
-        image_url = tags['image']
-        image_url = __IMGUR_URL.sub(r'https://i.imgur.com/\1.jpeg', image_url) # fix imgur links
-        return image_url
+        return __fix_imgur_link(tags['image'])
     return None
 
 __OPERATIONAL_STATUS_MAP = {
