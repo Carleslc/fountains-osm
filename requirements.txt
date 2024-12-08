@@ -1,5 +1,6 @@
 requests
 fastapi
+uvicorn
 overpass
 geopy
 python-dotenv

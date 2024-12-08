@@ -1,9 +1,17 @@
 #!/bin/bash
 
 # Logger
-log() {
-  echo "$(date --rfc-3339='seconds'): $*"
-}
+if date --version >/dev/null 2>&1; then
+  # GNU date (Linux)
+  log() {
+    echo "$(date --rfc-3339='seconds'): $*"
+  }
+else
+  # BSD date (macOS)
+  log() {
+    echo "$(date -u "+%Y-%m-%d %H:%M:%S%z"): $*"
+  }
+fi
 
 log "Start update_fountains.sh"
 
